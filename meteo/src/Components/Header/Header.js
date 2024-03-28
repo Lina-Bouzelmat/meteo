@@ -1,5 +1,8 @@
+import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-  const Container = styled.div`
+import { setLang } from '../../redux/langSlice'
+import { useSelector, useDispatch } from 'react-redux'
+    const Container = styled.div`
         display: flex;
         justify-content: space-between;
         width : 100vw;
@@ -32,17 +35,44 @@ import styled from 'styled-components'
         width : 13%;
         cursor : pointer;
     `   
-export default function Header(){
-    return(
-        <Container>
-            <Title>
-               Application météo
-            </Title>
-            <Lang>
-                <span>FR</span>
-                <span>-</span>
-                <span>EN</span>
-            </Lang>
-        </Container>
-    )
+    export default function Header(){
+        const langFR = useRef()
+        const langEN = useRef()
+        const dispatch = useDispatch()
+        
+        const lang = useSelector((state) => state.lang.value)
+        const [activeLang, setActiveLang] = useState(false)
+    
+        const changeLang = () => {
+            setActiveLang(activeLang === langFR.current ? langEN.current : langFR.current)
+        }
+    
+        useEffect(() => {
+            setActiveLang(langFR.current)
+        }, [])
+    
+        useEffect(() => {
+            if (activeLang === langFR.current) {
+                langFR.current.style.opacity = 1
+                langEN.current.style.opacity = 0.4
+                dispatch(setLang('fr'))
+            } else if (activeLang === langEN.current) {
+                langEN.current.style.opacity = 1
+                langFR.current.style.opacity = 0.4 
+                dispatch(setLang('en'))
+            }       
+        }, [activeLang])
+    
+        return (
+            <Container>
+                <Title>
+                    {lang === 'fr' ? 'Application météo' : 'Weather Application'}
+                </Title>
+                <Lang onClick={changeLang}>
+                    <span ref={langFR}>FR</span>
+                    <span>-</span>
+                    <span ref={langEN}>EN</span>
+                </Lang>
+            </Container>
+        )
 }
